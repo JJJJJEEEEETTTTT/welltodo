@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞书嵌入TODO应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #667eea;
+        }
+        
+        /* TODO List Styles */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .todo-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .todo-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .voice-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .voice-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .voice-recording {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .todo-list {
+            list-style: none;
+        }
+        
+        .todo-item {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        
+        .todo-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .todo-item.completed {
+            background: #edf2f7;
+            opacity: 0.7;
+        }
+        
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #666;
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .delete-btn {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .delete-btn:hover {
+            background: #feb2b2;
+        }
+        
+        /* Pomodoro Timer Styles */
+        .pomodoro-timer {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .timer-display {
+            font-size: 64px;
+            font-weight: 700;
+            color: #333;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .timer-status {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .work-mode {
+            color: #e53e3e;
+        }
+        
+        .break-mode {
+            color: #48bb78;
+        }
+        
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .timer-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .start-btn {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .start-btn:hover {
+            background: #38a169;
+        }
+        
+        .pause-btn {
+            background: #ecc94b;
+            color: white;
+        }
+        
+        .pause-btn:hover {
+            background: #d69e2e;
+        }
+        
+        .reset-btn {
+            background: #718096;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background: #4a5568;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 1s linear;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Voice Input Styles */
+        .voice-input-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .voice-status {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .voice-result {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 16px;
+            min-height: 60px;
+        }
+        
+        .voice-result-text {
+            color: #333;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .timer-display {
+                font-size: 48px;
+            }
+            
+            .timer-controls {
+                flex-wrap: wrap;
+            }
+        }
+        
+        /* Icons */
+        .icon {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🕒 飞书嵌入TODO应用</h1>
+            <p>简洁高效的TODO列表 + 番茄工作法计时器</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- TODO List Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span>📝</span> TODO 列表
+                </h2>
+                
+                <div class="input-group">
+                    <input type="text" class="todo-input" id="todoInput" placeholder="输入新的任务..." />
+                    <button class="btn btn-primary" id="addTodoBtn">
+                        <span>添加</span>
+                    </button>
+                    <button class="btn voice-btn" id="voiceBtn">
+                        <span>🎤 语音录入</span>
+                    </button>
+                </div>
+                
+                <div class="voice-input-container" id="voiceContainer" style="display: none;">
+                    <div class="voice-status" id="voiceStatus">点击下方按钮开始录音</div>
+                    <div class="input-group">
+                        <button class="btn btn-secondary" id="startRecordingBtn">
+                            <span>开始录音</span>
+                        </button>
+                        <button class="btn btn-secondary" id="stopRecordingBtn" disabled>
+                            <span>停止录音</span>
+                        </button>
+                    </div>
+                    <div class="voice-result">
+                        <div class="voice-result-text" id="voiceResult">识别结果将显示在这里...</div>
+                    </div>
+                </div>
+                
+                <ul class="todo-list" id="todoList">
+                    <!-- Todo items will be added here dynamically -->
+                </ul>
+            </div>
+            
+            <!-- Pomodoro Timer Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span>🍅</span> 番茄时钟
+                </h2>
+                
+                <div class="pomodoro-timer">
+                    <div class="timer-status" id="timerStatus">准备开始工作</div>
+                    <div class="timer-display" id="timerDisplay">25:00</div>
+                    
+                    <div class="timer-controls">
+                        <button class="timer-btn start-btn" id="startTimerBtn">开始</button>
+                        <button class="timer-btn pause-btn" id="pauseTimerBtn" disabled>暂停</button>
+                        <button class="timer-btn reset-btn" id="resetTimerBtn">重置</button>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress" id="progressBar"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span>工作时段：25分钟</span>
+                            <span>休息时段：5分钟</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>专为飞书嵌入设计 | 简洁高效的工作助手</p>
+        </div>
+    </div>
+
+    <script>
+        // TODO List Functionality
+        const todoInput = document.getElementById('todoInput');
+        const addTodoBtn = document.getElementById('addTodoBtn');
+        const todoList = document.getElementById('todoList');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const voiceContainer = document.getElementById('voiceContainer');
+        const startRecordingBtn = document.getElementById('startRecordingBtn');
+        const stopRecordingBtn = document.getElementById('stopRecordingBtn');
+        const voiceStatus = document.getElementById('voiceStatus');
+        const voiceResult = document.getElementById('voiceResult');
+
+        // Pomodoro Timer
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerStatus = document.getElementById('timerStatus');
+        const startTimerBtn = document.getElementById('startTimerBtn');
+        const pauseTimerBtn = document.getElementById('pauseTimerBtn');
+        const resetTimerBtn = document.getElementById('resetTimerBtn');
+        const progressBar = document.getElementById('progressBar');
+
+        // Initialize
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        let timerInterval;
+        let isTimerRunning = false;
+        let isWorkSession = true;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let totalTime = 25 * 60;
+
+        // Speech Recognition
+        let recognition;
+        let isRecording = false;
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'zh-CN';
+
+                recognition.onstart = function() {
+                    isRecording = true;
+                    voiceStatus.textContent = '正在录音...';
+                    startRecordingBtn.disabled = true;
+                    stopRecordingBtn.disabled = false;
+                    voiceBtn.classList.add('voice-recording');
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    voiceResult.textContent = transcript;
+                    todoInput.value = transcript;
+                    voiceStatus.textContent = '识别完成';
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    voiceStatus.textContent = '识别错误，请重试';
+                    isRecording = false;
+                    resetVoiceUI();
+                };
+
+                recognition.onend = function() {
+                    isRecording = false;
+                    resetVoiceUI();
+                };
+            } else {
+                voiceStatus.textContent = '您的浏览器不支持语音识别功能';
+                startRecordingBtn.disabled = true;
+            }
+        }
+
+        function resetVoiceUI() {
+            startRecordingBtn.disabled = false;
+            stopRecordingBtn.disabled = true;
+            voiceBtn.classList.remove('voice-recording');
+        }
+
+        // Voice button toggle
+        voiceBtn.addEventListener('click', function() {
+            if (voiceContainer.style.display === 'none') {
+                voiceContainer.style.display = 'block';
+                initSpeechRecognition();
+            } else {
+                voiceContainer.style.display = 'none';
+                if (recognition && isRecording) {
+                    recognition.stop();
+                }
+            }
+        });
+
+        startRecordingBtn.addEventListener('click', function() {
+            if (recognition && !isRecording) {
+                recognition.start();
+            }
+        });
+
+        stopRecordingBtn.addEventListener('click', function() {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+        });
+
+        // Add Todo
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (text) {
+                const todo = {
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                todos.push(todo);
+                saveTodos();
+                renderTodos();
+                todoInput.value = '';
+                voiceResult.textContent = '识别结果将显示在这里...';
+                
+                // Show success notification
+                Swal.fire({
+                    icon: 'success',
+                    title: '任务添加成功',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        }
+
+        addTodoBtn.addEventListener('click', addTodo);
+        todoInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        // Toggle Todo completion
+        function toggleTodo(id) {
+            todos = todos.map(todo => {
+                if (todo.id === id) {
+                    return { ...todo, completed: !todo.completed };
+                }
+                return todo;
+            });
+            saveTodos();
+            renderTodos();
+        }
+
+        // Delete Todo
+        function deleteTodo(id) {
+            Swal.fire({
+                title: '确定删除吗？',
+                text: "删除后无法恢复",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '删除',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    todos = todos.filter(todo => todo.id !== id);
+                    saveTodos();
+                    renderTodos();
+                    Swal.fire(
+                        '已删除！',
+                        '任务已成功删除',
+                        'success'
+                    );
+                }
+            });
+        }
+
+        // Save todos to localStorage
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        // Render todos
+        function renderTodos() {
+            todoList.innerHTML = '';
+            
+            if (todos.length === 0) {
+                todoList.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">暂无任务，添加你的第一个任务吧！</div>';
+                return;
+            }
+            
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} />
+                    <span class="todo-text">${todo.text}</span>
+                    <div class="todo-actions">
+                        <button class="btn-icon delete-btn" title="删除">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                
+                const checkbox = li.querySelector('.todo-checkbox');
+                const deleteBtn = li.querySelector('.delete-btn');
+                
+                checkbox.addEventListener('change', () => toggleTodo(todo.id));
+                deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
+                
+                todoList.appendChild(li);
+            });
+        }
+
+        // Pomodoro Timer Functions
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            timerDisplay.textContent = formatTime(timeLeft);
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function startTimer() {
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        
+                        if (isWorkSession) {
+                            // Work session finished, start break
+                            isWorkSession = false;
+                            timeLeft = 5 * 60; // 5 minutes break
+                            totalTime = 5 * 60;
+                            timerStatus.textContent = '休息时间';
+                            timerStatus.className = 'timer-status break-mode';
+                            
+                            // Show notification
+                            Swal.fire({
+                                title: '工作时段结束！',
+                                text: '开始5分钟休息',
+                                icon: 'success',
+                                confirmButtonText: '好的'
+                            });
+                        } else {
+                            // Break finished, start work session
+                            isWorkSession = true;
+                            timeLeft = 25 * 60; // 25 minutes work
+                            totalTime = 25 * 60;
+                            timerStatus.textContent = '工作时间';
+                            timerStatus.className = 'timer-status work-mode';
+                            
+                            // Show notification
+                            Swal.fire({
+                                title: '休息结束！',
+                                text: '开始25分钟工作',
+                                icon: 'info',
+                                confirmButtonText: '开始工作'
+                            });
+                        }
+                        
+                        updateTimerDisplay();
+                        startTimerBtn.disabled = false;
+                        pauseTimerBtn.disabled = true;
+                        startTimerBtn.textContent = '开始';
+                    }
+                }, 1000);
+                
+                startTimerBtn.disabled = true;
+                pauseTimerBtn.disabled = false;
+                startTimerBtn.textContent = '运行中...';
+            }
+        }
+
+        function pauseTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                startTimerBtn.disabled = false;
+                pauseTimerBtn.disabled = true;
+                startTimerBtn.textContent = '继续';
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            isWorkSession = true;
+            timeLeft = 25 * 60;
+            totalTime = 25 * 60;
+            
+            timerStatus.textContent = '准备开始工作';
+            timerStatus.className = 'timer-status';
+            updateTimerDisplay();
+            
+            startTimerBtn.disabled = false;
+            pauseTimerBtn.disabled = true;
+            startTimerBtn.textContent = '开始';
+        }
+
+        // Event Listeners for Timer
+        startTimerBtn.addEventListener('click', startTimer);
+        pauseTimerBtn.addEventListener('click', pauseTimer);
+        resetTimerBtn.addEventListener('click', resetTimer);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTodos();
+            updateTimerDisplay();
+            
+            // Set initial timer status
+            timerStatus.className = 'timer-status work-mode';
+            timerStatus.textContent = '准备开始工作';
+        });
+    </script>
+</body>
+</html>
