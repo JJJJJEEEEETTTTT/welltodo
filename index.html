@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飞书嵌入TODO应用</title>
+    <title>Welltodo</title>
     <style>
         * {
             margin: 0;
@@ -76,10 +76,12 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
         .todo-input {
             flex: 1;
+            min-width: 200px;
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -155,10 +157,11 @@
             border-radius: 8px;
             margin-bottom: 12px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
             border: 1px solid #e9ecef;
             transition: all 0.3s;
+            flex-wrap: wrap;
         }
         
         .todo-item:hover {
@@ -171,21 +174,47 @@
             opacity: 0.7;
         }
         
+        .todo-item.reminder-set {
+            border-left: 4px solid #f6ad55;
+        }
+        
+        .todo-item.location-set {
+            border-left: 4px solid #4299e1;
+        }
+        
         .todo-checkbox {
             width: 20px;
             height: 20px;
             cursor: pointer;
+            margin-top: 2px;
+        }
+        
+        .todo-content {
+            flex: 1;
         }
         
         .todo-text {
-            flex: 1;
             font-size: 16px;
             color: #333;
+            margin-bottom: 4px;
         }
         
         .todo-item.completed .todo-text {
             text-decoration: line-through;
             color: #666;
+        }
+        
+        .todo-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .todo-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         
         .todo-actions {
@@ -212,6 +241,34 @@
         
         .delete-btn:hover {
             background: #feb2b2;
+        }
+        
+        .reminder-btn {
+            background: #feebc8;
+            color: #c05621;
+        }
+        
+        .reminder-btn:hover {
+            background: #fbd38d;
+        }
+        
+        .reminder-btn.active {
+            background: #f6ad55;
+            color: white;
+        }
+        
+        .location-btn {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+        
+        .location-btn:hover {
+            background: #90cdf4;
+        }
+        
+        .location-btn.active {
+            background: #4299e1;
+            color: white;
         }
         
         /* Pomodoro Timer Styles */
@@ -246,6 +303,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
         
         .timer-btn {
@@ -341,6 +399,189 @@
             color: #333;
         }
         
+        /* Reminder Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .quick-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-btn {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .quick-btn:hover {
+            background: #f7fafc;
+            border-color: #667eea;
+        }
+        
+        .quick-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .modal-btn-cancel:hover {
+            background: #d0d0d0;
+        }
+        
+        .modal-btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            background: #5a67d8;
+        }
+        
+        /* Location Section */
+        .location-display {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .location-title {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .location-btn {
+            padding: 8px 16px;
+            background: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .location-btn:hover {
+            background: #3182ce;
+        }
+        
+        .location-info {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .location-loading {
+            color: #4299e1;
+            text-align: center;
+        }
+        
+        .location-error {
+            color: #e53e3e;
+            text-align: center;
+        }
+        
+        .current-location {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f9ff;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
         /* Footer */
         .footer {
             text-align: center;
@@ -361,12 +602,26 @@
                 flex-direction: column;
             }
             
+            .todo-input {
+                min-width: 100%;
+            }
+            
             .timer-display {
                 font-size: 48px;
             }
             
             .timer-controls {
                 flex-wrap: wrap;
+            }
+            
+            .todo-item {
+                flex-direction: column;
+            }
+            
+            .todo-actions {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 10px;
             }
         }
         
@@ -375,17 +630,54 @@
             width: 24px;
             height: 24px;
         }
+        
+        /* Notification permission banner */
+        .permission-banner {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .permission-banner-text {
+            font-size: 14px;
+            color: #92400e;
+        }
+        
+        .permission-btn {
+            padding: 8px 16px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .permission-btn:hover {
+            background: #d97706;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="app-container">
         <div class="header">
-            <h1>🕒 飞书嵌入TODO应用</h1>
-            <p>简洁高效的TODO列表 + 番茄工作法计时器</p>
+            <h1>📋 Welltodo</h1>
+            <p>简洁高效的 TODO 列表 + 番茄工作法</p>
         </div>
         
         <div class="main-content">
+            <!-- Notification Permission Banner -->
+            <div class="permission-banner" id="notificationBanner" style="display: none;">
+                <span class="permission-banner-text">🔔 开启通知提醒，不错过任何待办事项</span>
+                <button class="permission-btn" id="enableNotificationBtn">开启通知</button>
+            </div>
+            
             <!-- TODO List Section -->
             <div class="section">
                 <h2 class="section-title">
@@ -403,13 +695,13 @@
                 </div>
                 
                 <div class="voice-input-container" id="voiceContainer" style="display: none;">
-                    <div class="voice-status" id="voiceStatus">点击下方按钮开始录音</div>
+                    <div class="voice-status" id="voiceStatus">🎤 点击下方按钮开始录音</div>
                     <div class="input-group">
                         <button class="btn btn-secondary" id="startRecordingBtn">
-                            <span>开始录音</span>
+                            <span>🎙️ 开始录音</span>
                         </button>
-                        <button class="btn btn-secondary" id="stopRecordingBtn" disabled>
-                            <span>停止录音</span>
+                        <button class="btn btn-secondary" id="stopRecordingBtn" style="background: #e53e3e;">
+                            <span>⏹️ 停止录音</span>
                         </button>
                     </div>
                     <div class="voice-result">
@@ -449,15 +741,58 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Location Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span>📍</span> 位置定位
+                </h2>
+                
+                <div class="location-display">
+                    <div class="location-header">
+                        <span class="location-title">当前位置</span>
+                        <button class="location-btn" id="getLocationBtn">📍 获取位置</button>
+                    </div>
+                    <div class="location-info" id="locationInfo">
+                        点击上方按钮获取当前位置信息
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="footer">
-            <p>专为飞书嵌入设计 | 简洁高效的工作助手</p>
+            <p>© 2026 Welltodo | 简洁高效的工作助手</p>
+        </div>
+    </div>
+
+    <!-- Reminder Modal -->
+    <div class="modal" id="reminderModal">
+        <div class="modal-content">
+            <div class="modal-header">⏰ 设置提醒</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">快速选择</label>
+                    <div class="quick-buttons">
+                        <button class="quick-btn" data-minutes="5">5分钟后</button>
+                        <button class="quick-btn" data-minutes="15">15分钟后</button>
+                        <button class="quick-btn" data-minutes="30">30分钟后</button>
+                        <button class="quick-btn" data-minutes="60">1小时后</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">自定义时间</label>
+                    <input type="datetime-local" class="form-input" id="customReminderTime" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" id="cancelReminderBtn">取消</button>
+                <button class="modal-btn modal-btn-primary" id="confirmReminderBtn">确认</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // TODO List Functionality
+        // ==================== 初始化 ====================
         const todoInput = document.getElementById('todoInput');
         const addTodoBtn = document.getElementById('addTodoBtn');
         const todoList = document.getElementById('todoList');
@@ -476,57 +811,136 @@
         const resetTimerBtn = document.getElementById('resetTimerBtn');
         const progressBar = document.getElementById('progressBar');
 
+        // Location
+        const locationBtn = document.getElementById('getLocationBtn');
+        const locationInfo = document.getElementById('locationInfo');
+
+        // Reminder Modal
+        const reminderModal = document.getElementById('reminderModal');
+        const customReminderTime = document.getElementById('customReminderTime');
+        const quickBtns = document.querySelectorAll('.quick-btn');
+
         // Initialize
         let todos = JSON.parse(localStorage.getItem('todos')) || [];
         let timerInterval;
         let isTimerRunning = false;
         let isWorkSession = true;
-        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let timeLeft = 25 * 60;
         let totalTime = 25 * 60;
 
         // Speech Recognition
-        let recognition;
+        let recognition = null;
         let isRecording = false;
 
-        // Initialize speech recognition
-        function initSpeechRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'zh-CN';
+        // Current editing todo id
+        let currentEditTodoId = null;
 
-                recognition.onstart = function() {
-                    isRecording = true;
-                    voiceStatus.textContent = '正在录音...';
-                    startRecordingBtn.disabled = true;
-                    stopRecordingBtn.disabled = false;
-                    voiceBtn.classList.add('voice-recording');
-                };
+        // Current location
+        let currentLocation = null;
 
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    voiceResult.textContent = transcript;
-                    todoInput.value = transcript;
-                    voiceStatus.textContent = '识别完成';
-                };
+        // Notification permission
+        let notificationPermission = Notification.permission;
 
-                recognition.onerror = function(event) {
-                    console.error('Speech recognition error:', event.error);
-                    voiceStatus.textContent = '识别错误，请重试';
-                    isRecording = false;
-                    resetVoiceUI();
-                };
-
-                recognition.onend = function() {
-                    isRecording = false;
-                    resetVoiceUI();
-                };
-            } else {
-                voiceStatus.textContent = '您的浏览器不支持语音识别功能';
-                startRecordingBtn.disabled = true;
+        // ==================== 通知权限检查 ====================
+        function checkNotificationPermission() {
+            if ('Notification' in window) {
+                if (Notification.permission === 'default') {
+                    document.getElementById('notificationBanner').style.display = 'flex';
+                }
             }
+        }
+
+        document.getElementById('enableNotificationBtn').addEventListener('click', async () => {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                document.getElementById('notificationBanner').style.display = 'none';
+                notificationPermission = 'granted';
+                showNotification('Welltodo', '通知功能已开启！');
+            }
+        });
+
+        function showNotification(title, body) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: '📋'
+                });
+            }
+        }
+
+        // ==================== 语音识别功能 ====================
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                voiceStatus.textContent = '❌ 您的浏览器不支持语音识别功能';
+                startRecordingBtn.disabled = true;
+                return false;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'zh-CN';
+
+            recognition.onstart = function() {
+                isRecording = true;
+                voiceStatus.textContent = '🎙️ 正在录音... 请说话';
+                startRecordingBtn.disabled = true;
+                stopRecordingBtn.disabled = false;
+                voiceBtn.classList.add('voice-recording');
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                if (finalTranscript) {
+                    voiceResult.textContent = finalTranscript;
+                    todoInput.value = finalTranscript;
+                } else if (interimTranscript) {
+                    voiceResult.textContent = interimTranscript;
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                isRecording = false;
+                
+                if (event.error === 'not-allowed') {
+                    voiceStatus.textContent = '❌ 请允许使用麦克风权限';
+                    Swal.fire({
+                        icon: 'error',
+                        title: '麦克风权限被拒绝',
+                        text: '请在浏览器设置中允许麦克风访问'
+                    });
+                } else if (event.error === 'no-speech') {
+                    voiceStatus.textContent = '⚠️ 未检测到语音，请重试';
+                } else {
+                    voiceStatus.textContent = '❌ 识别错误: ' + event.error;
+                }
+                
+                resetVoiceUI();
+            };
+
+            recognition.onend = function() {
+                isRecording = false;
+                resetVoiceUI();
+                if (voiceResult.textContent && voiceResult.textContent !== '识别结果将显示在这里...') {
+                    voiceStatus.textContent = '✅ 识别完成';
+                }
+            };
+
+            return true;
         }
 
         function resetVoiceUI() {
@@ -539,7 +953,9 @@
         voiceBtn.addEventListener('click', function() {
             if (voiceContainer.style.display === 'none') {
                 voiceContainer.style.display = 'block';
-                initSpeechRecognition();
+                if (!recognition) {
+                    initSpeechRecognition();
+                }
             } else {
                 voiceContainer.style.display = 'none';
                 if (recognition && isRecording) {
@@ -549,18 +965,233 @@
         });
 
         startRecordingBtn.addEventListener('click', function() {
-            if (recognition && !isRecording) {
+            if (!recognition) {
+                if (!initSpeechRecognition()) return;
+            }
+            
+            try {
                 recognition.start();
+            } catch (e) {
+                console.error('Recognition start error:', e);
+                // 如果已经在运行，先停止再开始
+                recognition.stop();
+                setTimeout(() => {
+                    recognition.start();
+                }, 100);
             }
         });
 
         stopRecordingBtn.addEventListener('click', function() {
             if (recognition && isRecording) {
                 recognition.stop();
+                voiceStatus.textContent = '⏹️ 录音已停止';
             }
         });
 
-        // Add Todo
+        // ==================== 位置定位功能 ====================
+        function getLocation() {
+            locationInfo.innerHTML = '<div class="location-loading">📍 正在获取位置...</div>';
+            locationBtn.disabled = true;
+            locationBtn.textContent = '获取中...';
+
+            if (!navigator.geolocation) {
+                locationInfo.innerHTML = '<div class="location-error">❌ 您的浏览器不支持地理定位</div>';
+                locationBtn.disabled = false;
+                locationBtn.textContent = '📍 获取位置';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = Math.round(position.coords.accuracy);
+                    
+                    currentLocation = { lat, lng, accuracy };
+                    
+                    locationInfo.innerHTML = `
+                        <div class="current-location">
+                            <strong>📍 当前位置</strong><br>
+                            纬度: ${lat.toFixed(6)}<br>
+                            经度: ${lng.toFixed(6)}<br>
+                            精度: ${accuracy}米
+                        </div>
+                    `;
+                    
+                    locationBtn.disabled = false;
+                    locationBtn.textContent = '📍 刷新位置';
+                    
+                    showNotification('Welltodo', '位置已获取成功');
+                },
+                (error) => {
+                    let errorMsg = '';
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = '❌ 定位权限被拒绝，请允许访问位置';
+                            Swal.fire({
+                                icon: 'error',
+                                title: '位置权限被拒绝',
+                                text: '请在浏览器设置中允许位置访问'
+                            });
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = '❌ 无法获取位置信息';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = '❌ 获取位置超时';
+                            break;
+                        default:
+                            errorMsg = '❌ 获取位置失败';
+                    }
+                    
+                    locationInfo.innerHTML = `<div class="location-error">${errorMsg}</div>`;
+                    locationBtn.disabled = false;
+                    locationBtn.textContent = '📍 获取位置';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        locationBtn.addEventListener('click', getLocation);
+
+        // ==================== 定时提醒功能 ====================
+        function openReminderModal(todoId) {
+            currentEditTodoId = todoId;
+            reminderModal.classList.add('show');
+            customReminderTime.value = '';
+            
+            // 清除所有快速按钮的激活状态
+            quickBtns.forEach(btn => btn.classList.remove('active'));
+        }
+
+        function closeReminderModal() {
+            reminderModal.classList.remove('show');
+            currentEditTodoId = null;
+        }
+
+        // 快速选择按钮
+        quickBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                quickBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                customReminderTime.value = '';
+            });
+        });
+
+        document.getElementById('cancelReminderBtn').addEventListener('click', closeReminderModal);
+
+        document.getElementById('confirmReminderBtn').addEventListener('click', () => {
+            let remindAt = null;
+
+            // 检查快速按钮
+            const activeQuickBtn = document.querySelector('.quick-btn.active');
+            if (activeQuickBtn) {
+                const minutes = parseInt(activeQuickBtn.dataset.minutes);
+                remindAt = Date.now() + minutes * 60 * 1000;
+            } else if (customReminderTime.value) {
+                remindAt = new Date(customReminderTime.value).getTime();
+            }
+
+            if (remindAt) {
+                if (remindAt <= Date.now()) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '时间无效',
+                        text: '提醒时间必须是将来的时间'
+                    });
+                    return;
+                }
+
+                todos = todos.map(todo => {
+                    if (todo.id === currentEditTodoId) {
+                        return { 
+                            ...todo, 
+                            remindAt: remindAt,
+                            location: currentLocation ? `${currentLocation.lat.toFixed(6)}, ${currentLocation.lng.toFixed(6)}` : todo.location
+                        };
+                    }
+                    return todo;
+                });
+
+                saveTodos();
+                renderTodos();
+                
+                // 设置定时器
+                setReminderTimer(currentEditTodoId, remindAt);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '提醒已设置',
+                    text: '到期后会收到通知提醒'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '请选择提醒时间'
+                });
+                return;
+            }
+
+            closeReminderModal();
+        });
+
+        function setReminderTimer(todoId, remindAt) {
+            const delay = remindAt - Date.now();
+            
+            setTimeout(() => {
+                const todo = todos.find(t => t.id === todoId);
+                if (todo && !todo.completed) {
+                    showNotification('⏰ 提醒', `任务待办: ${todo.text}`);
+                    
+                    // 浏览器通知
+                    if (Notification.permission === 'granted') {
+                        new Notification('Welltodo - 任务提醒', {
+                            body: todo.text,
+                            icon: '📋',
+                            tag: 'welltodo-reminder'
+                        });
+                    }
+
+                    // 播放提示音
+                    playReminderSound();
+                }
+            }, delay);
+        }
+
+        function playReminderSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 1);
+            } catch (e) {
+                console.log('无法播放提示音');
+            }
+        }
+
+        // 关闭弹窗点击外部
+        reminderModal.addEventListener('click', (e) => {
+            if (e.target === reminderModal) {
+                closeReminderModal();
+            }
+        });
+
+        // ==================== TODO 功能 ====================
         function addTodo() {
             const text = todoInput.value.trim();
             if (text) {
@@ -568,7 +1199,9 @@
                     id: Date.now(),
                     text: text,
                     completed: false,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    remindAt: null,
+                    location: currentLocation ? `${currentLocation.lat.toFixed(6)}, ${currentLocation.lng.toFixed(6)}` : null
                 };
                 
                 todos.push(todo);
@@ -577,13 +1210,16 @@
                 todoInput.value = '';
                 voiceResult.textContent = '识别结果将显示在这里...';
                 
-                // Show success notification
-                Swal.fire({
-                    icon: 'success',
-                    title: '任务添加成功',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                if (currentLocation) {
+                    showNotification('Welltodo', '任务已添加，位置已记录');
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '任务添加成功',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
             }
         }
 
@@ -594,7 +1230,6 @@
             }
         });
 
-        // Toggle Todo completion
         function toggleTodo(id) {
             todos = todos.map(todo => {
                 if (todo.id === id) {
@@ -606,7 +1241,6 @@
             renderTodos();
         }
 
-        // Delete Todo
         function deleteTodo(id) {
             Swal.fire({
                 title: '确定删除吗？',
@@ -631,12 +1265,27 @@
             });
         }
 
-        // Save todos to localStorage
         function saveTodos() {
             localStorage.setItem('todos', JSON.stringify(todos));
         }
 
-        // Render todos
+        function formatReminderTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = timestamp - now.getTime();
+            
+            if (diff < 0) return '已过期';
+            
+            if (diff < 60 * 60 * 1000) {
+                return `⏰ ${Math.round(diff / 60000)}分钟后`;
+            } else if (diff < 24 * 60 * 60 * 1000) {
+                return `⏰ ${Math.round(diff / 3600000)}小时后`;
+            } else {
+                return `⏰ ${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            }
+        }
+
         function renderTodos() {
             todoList.innerHTML = '';
             
@@ -647,11 +1296,38 @@
             
             todos.forEach(todo => {
                 const li = document.createElement('li');
-                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                
+                let metaClass = '';
+                if (todo.remindAt) metaClass += ' reminder-set';
+                if (todo.location) metaClass += ' location-set';
+                
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}${metaClass}`;
+                
+                let metaHtml = '';
+                if (todo.remindAt || todo.location) {
+                    metaHtml = `<div class="todo-meta">`;
+                    if (todo.remindAt) {
+                        metaHtml += `<span class="todo-meta-item">${formatReminderTime(todo.remindAt)}</span>`;
+                    }
+                    if (todo.location) {
+                        metaHtml += `<span class="todo-meta-item">📍 ${todo.location}</span>`;
+                    }
+                    metaHtml += `</div>`;
+                }
+                
                 li.innerHTML = `
                     <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} />
-                    <span class="todo-text">${todo.text}</span>
+                    <div class="todo-content">
+                        <div class="todo-text">${todo.text}</div>
+                        ${metaHtml}
+                    </div>
                     <div class="todo-actions">
+                        <button class="btn-icon reminder-btn ${todo.remindAt ? 'active' : ''}" title="设置提醒">
+                            ⏰
+                        </button>
+                        <button class="btn-icon location-btn ${todo.location ? 'active' : ''}" title="添加位置">
+                            📍
+                        </button>
                         <button class="btn-icon delete-btn" title="删除">
                             🗑️
                         </button>
@@ -660,15 +1336,45 @@
                 
                 const checkbox = li.querySelector('.todo-checkbox');
                 const deleteBtn = li.querySelector('.delete-btn');
+                const reminderBtn = li.querySelector('.reminder-btn');
+                const locationBtn = li.querySelector('.location-btn');
                 
                 checkbox.addEventListener('change', () => toggleTodo(todo.id));
                 deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
+                reminderBtn.addEventListener('click', () => openReminderModal(todo.id));
+                locationBtn.addEventListener('click', () => {
+                    if (currentLocation) {
+                        todos = todos.map(t => {
+                            if (t.id === todo.id) {
+                                return { 
+                                    ...t, 
+                                    location: `${currentLocation.lat.toFixed(6)}, ${currentLocation.lng.toFixed(6)}`
+                                };
+                            }
+                            return t;
+                        });
+                        saveTodos();
+                        renderTodos();
+                        Swal.fire({
+                            icon: 'success',
+                            title: '位置已添加',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: '请先获取位置',
+                            text: '点击"位置定位"区域的"获取位置"按钮'
+                        });
+                    }
+                });
                 
                 todoList.appendChild(li);
             });
         }
 
-        // Pomodoro Timer Functions
+        // ==================== 番茄时钟功能 ====================
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
@@ -693,14 +1399,14 @@
                         isTimerRunning = false;
                         
                         if (isWorkSession) {
-                            // Work session finished, start break
                             isWorkSession = false;
-                            timeLeft = 5 * 60; // 5 minutes break
+                            timeLeft = 5 * 60;
                             totalTime = 5 * 60;
                             timerStatus.textContent = '休息时间';
                             timerStatus.className = 'timer-status break-mode';
                             
-                            // Show notification
+                            showNotification('🍅 番茄时钟', '工作时段结束！开始休息吧');
+                            
                             Swal.fire({
                                 title: '工作时段结束！',
                                 text: '开始5分钟休息',
@@ -708,14 +1414,14 @@
                                 confirmButtonText: '好的'
                             });
                         } else {
-                            // Break finished, start work session
                             isWorkSession = true;
-                            timeLeft = 25 * 60; // 25 minutes work
+                            timeLeft = 25 * 60;
                             totalTime = 25 * 60;
                             timerStatus.textContent = '工作时间';
                             timerStatus.className = 'timer-status work-mode';
                             
-                            // Show notification
+                            showNotification('🍅 番茄时钟', '休息结束！开始新的一轮工作吧');
+                            
                             Swal.fire({
                                 title: '休息结束！',
                                 text: '开始25分钟工作',
@@ -763,19 +1469,25 @@
             startTimerBtn.textContent = '开始';
         }
 
-        // Event Listeners for Timer
         startTimerBtn.addEventListener('click', startTimer);
         pauseTimerBtn.addEventListener('click', pauseTimer);
         resetTimerBtn.addEventListener('click', resetTimer);
 
-        // Initialize
+        // ==================== 初始化 ====================
         document.addEventListener('DOMContentLoaded', function() {
             renderTodos();
             updateTimerDisplay();
+            checkNotificationPermission();
             
-            // Set initial timer status
             timerStatus.className = 'timer-status work-mode';
             timerStatus.textContent = '准备开始工作';
+            
+            // 恢复已有的提醒定时器
+            todos.forEach(todo => {
+                if (todo.remindAt && !todo.completed && todo.remindAt > Date.now()) {
+                    setReminderTimer(todo.id, todo.remindAt);
+                }
+            });
         });
     </script>
 </body>
