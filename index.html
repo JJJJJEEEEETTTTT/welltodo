@@ -1562,7 +1562,8 @@
         resetTimerBtn.addEventListener('click', resetTimer);
 
         // ==================== 初始化 ====================
-        document.addEventListener('DOMContentLoaded', function() {
+        function initApp() {
+            // 初始化显示
             renderTodos();
             updateTimerDisplay();
             checkNotificationPermission();
@@ -1576,7 +1577,14 @@
                     setReminderTimer(todo.id, todo.remindAt);
                 }
             });
-        });
+        }
+
+        // 兼容 DOMContentLoaded 和页面已加载的情况
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
     </script>
 </body>
 </html>
