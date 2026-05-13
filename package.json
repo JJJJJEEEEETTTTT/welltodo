@@ -1,0 +1,21 @@
+{
+  "name": "feishu-todo-app",
+  "version": "1.0.0",
+  "description": "飞书嵌入TODO应用，包含语音录入和番茄时钟功能",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "dev": "npx serve -s . -l 3000"
+  },
+  "keywords": [
+    "feishu",
+    "todo",
+    "pomodoro",
+    "voice-input",
+    "lark"
+  ],
+  "author": "Feishu Todo App",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
