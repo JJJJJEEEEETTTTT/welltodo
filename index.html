@@ -1474,7 +1474,7 @@
         resetTimerBtn.addEventListener('click', resetTimer);
 
         // ==================== 初始化 ====================
-        document.addEventListener('DOMContentLoaded', function() {
+        function initApp() {
             renderTodos();
             updateTimerDisplay();
             checkNotificationPermission();
@@ -1488,7 +1488,15 @@
                     setReminderTimer(todo.id, todo.remindAt);
                 }
             });
-        });
+        }
+
+        // 修复 iOS Safari 问题：同时处理 DOMContentLoaded 和页面已加载情况
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            // DOM 已就绪，立即初始化
+            initApp();
+        }
     </script>
 </body>
 </html>
